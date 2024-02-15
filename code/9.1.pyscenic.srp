@@ -1,0 +1,38 @@
+#!/bin/bash
+#SBATCH -J arboreto_with_multiprocessing
+#SBATCH -p cn-short
+#SBATCH -o %j.out
+#SBATCH -e %j.err
+#SBATCH -N 2
+#SBATCH --ntasks-per-node=10
+
+loomfile=~/cellranger.7.0.1/2.MM/500_5000_10/9.MMsub/3.SCT/6.res0.1_ex_10_12_13/7.MMsub/11.MMsub_copykat/8.pysenic/MMunscenic.loom
+ref=/gdata01/AnnotationPackage/pyscenic
+
+source /apps/source/conda-4.10.3.sh
+source activate pyscenic
+
+arboreto_with_multiprocessing.py \
+    $loomfile \
+    $ref/allTFs_hg38.txt \
+    --output adj.tsv \
+    --num_workers 20 \
+
+pyscenic ctx \
+adj.tsv \
+$ref/hg38__refseq-r80__10kb_up_and_down_tss.mc9nr.genes_vs_motifs.rankings.feather \
+--annotations_fname $ref/motifs-v9-nr.hgnc-m0.001-o0.0.tbl \
+--expression_mtx_fname $loomfile \
+--mode "dask_multiprocessing" \
+--output reg.csv \
+--num_workers 20 \
+--mask_dropouts
+
+
+pyscenic aucell \
+$loomfile \
+reg.csv \
+--output MM_SCENIC.loom \
+--num_workers 20
+
+conda deactivate

@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH -J velocyto_run10x
+#SBATCH -p cn-short
+#SBATCH -o %j.out
+#SBATCH -e %j.err
+#SBATCH -N 4
+#SBATCH --ntasks-per-node=10
+
+source /apps/source/conda-4.10.3.sh
+source activate velocyto
+
+refdata=/gdata01/AnnotationPackage/refdata-gex-GRCh38-2020-A/genes/genes.gtf
+mskfile=/gdata01/AnnotationPackage/velocyto/gene.gtf
+scRNAout=/gdata01/user/tianjie/cellranger.7.0.1/cellrank
+samples=~/cellranger.7.0.1/cellrank/samplelist2.txt
+
+for i in $(cat $samples)
+
+    do
+
+        velocyto run10x -m $mskfile $scRNAout/$i/$i $refdata
+        
+    done
+
+
+
+
+
